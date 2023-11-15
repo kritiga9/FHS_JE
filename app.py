@@ -3,6 +3,15 @@ import random
 import pandas as pd
 from datetime import datetime, timedelta
 
+restaurant_aux = pd.read_csv("in.c_streamlitio.restaurant_aux.csv")
+
+#Restaurants should be filtered based on the list of entities 
+#And entities should be filtered based on the Username
+#As we don't have a list yet, I took FHS_CORP entity
+restaurants_filtered = restaurant_aux[restaurant_aux['entity_name'] == 'FHS_CORP']['Restaurant'].unique().tolist()
+daily_totals = pd.read_csv("daily_totals.csv")
+
+
 def show_welcome_page():
     st.title("Welcome")
     col1, col2, col3 = st.columns(3)
@@ -24,7 +33,7 @@ def show_qb_authentication_page():
 
 def show_selection_page():
     st.title("Select a Location")
-    locations = ["ACWORTH", "WAVERLY", "WESLEY CHAPEL", "WONDERLAND SOUTH", "BURLINGTON"]
+    locations = restaurants_filtered
     for location in locations:
         if st.button(location):
             st.session_state.selected_location = location
@@ -33,7 +42,7 @@ def show_selection_page():
 
 def show_invoice_selection_page():
     st.title("Select a Location for Invoice")
-    locations = ["ACWORTH", "WAVERLY", "WESLEY CHAPEL", "WONDERLAND SOUTH", "BURLINGTON"]
+    locations = restaurants_filtered
     for location in locations:
         if st.button(location):
             st.session_state.selected_location = location
@@ -44,12 +53,9 @@ def show_daily_sales_export_page():
     st.title(st.session_state.selected_location)
     st.subheader("Daily Sales Export")
     
-    # Generating dummy data
-    dates = [(datetime.now() - timedelta(days=i)).strftime('%d/%b/%Y') for i in range(30)]
-    sales = [f"${random.uniform(1000.0, 100000.0):,.2f}" for _ in range(30)]
-    data = {"Date": dates, "Gross Sales": sales}
+    # Filter daily_totals DataFrame based on selected_location
+    filtered_daily_totals = daily_totals[daily_totals['Location'] == st.session_state.selected_location]
     
-    df = pd.DataFrame(data)
     
     # Display column headers
     col1, col2, col3, col4 = st.columns(4)
@@ -58,14 +64,22 @@ def show_daily_sales_export_page():
     col3.markdown("**Post to QuickBooks**")
     col4.markdown("**Skip**")
     
-    for index, row in df.iterrows():
+    # Define a CSS style to reduce the gap between lines
+    hr_style = 'border: none; height: 1px; background-color: #ccc; margin: 5px 0;'
+
+    
+    for index, row in filtered_daily_totals.iterrows():
         col1, col2, col3, col4 = st.columns(4)
         col1.write(row["Date"])
-        col2.write(row["Gross Sales"])
+        col2.write(f"${row['Gross_sales']:.2f}")
         with col3:
             st.button("Review & Post", key=f"Review&Post_{index}")
         with col4:
             st.button("Skip", key=f"Skip_{index}")
+        
+        # Add a horizontal line to separate rows
+        st.markdown(f'<hr style="{hr_style}">', unsafe_allow_html=True)
+    
 
 def show_distribution_invoices_page():
     st.title(st.session_state.selected_location)
@@ -117,3 +131,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
