@@ -11,21 +11,24 @@ restaurant_aux = pd.read_csv("in.c_streamlitio.restaurant_aux.csv")
 restaurants_filtered = restaurant_aux[restaurant_aux['entity_name'] == 'FHS_CORP']['Restaurant'].unique().tolist()
 daily_totals = pd.read_csv("daily_totals.csv")
 
+# Initialize the current page as a session state variable
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "Welcome"
 
 def show_welcome_page():
     st.title("Welcome")
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("QB authentication"):
-            st.session_state.page = "QB authentication"
+            st.session_state.current_page = "QB authentication"
             st.experimental_rerun()
     with col2:
         if st.button("QB Journal Entry"):
-            st.session_state.page = "Selection"
+            st.session_state.current_page = "Selection"
             st.experimental_rerun()
     with col3:
         if st.button("QB Invoices"):
-            st.session_state.page = "InvoiceSelection"
+            st.session_state.current_page = "InvoiceSelection"
             st.experimental_rerun()
 
 def show_qb_authentication_page():
@@ -37,7 +40,7 @@ def show_selection_page():
     for location in locations:
         if st.button(location):
             st.session_state.selected_location = location
-            st.session_state.page = "Daily Sales Export"
+            st.session_state.current_page = "Daily Sales Export"
             st.experimental_rerun()
 
 def show_invoice_selection_page():
@@ -46,7 +49,7 @@ def show_invoice_selection_page():
     for location in locations:
         if st.button(location):
             st.session_state.selected_location = location
-            st.session_state.page = "Distribution Invoices"
+            st.session_state.current_page = "Distribution Invoices"
             st.experimental_rerun()
 
 def show_daily_sales_export_page():
@@ -111,25 +114,27 @@ def show_distribution_invoices_page():
         with col5:
             st.button("Skip", key=f"Skip_Invoice_{index}")
 
-def main():
-    # Page routing
-    if "page" not in st.session_state:
-        st.session_state.page = "Welcome"
+# Sidebar navigation
+st.sidebar.title("Sidebar Navigation")
+if st.sidebar.button("Welcome", key="sidebar_welcome_button"):
+    st.session_state.current_page = "Welcome"
+if st.sidebar.button("QB authentication", key="sidebar_auth_button"):
+    st.session_state.current_page = "QB authentication"
+if st.sidebar.button("QB Journal Entry", key="sidebar_journal_button"):
+    st.session_state.current_page = "Selection"
+if st.sidebar.button("QB Invoices", key="sidebar_invoices_button"):
+    st.session_state.current_page = "InvoiceSelection"
 
-    if st.session_state.page == "Welcome":
-        show_welcome_page()
-    elif st.session_state.page == "QB authentication":
-        show_qb_authentication_page()
-    elif st.session_state.page == "Selection":
-        show_selection_page()
-    elif st.session_state.page == "InvoiceSelection":
-        show_invoice_selection_page()
-    elif st.session_state.page == "Daily Sales Export":
-        show_daily_sales_export_page()
-    elif st.session_state.page == "Distribution Invoices":
-        show_distribution_invoices_page()
-
-if __name__ == "__main__":
-    main()
-
-
+# Main page routing
+if st.session_state.current_page == "Welcome":
+    show_welcome_page()
+elif st.session_state.current_page == "QB authentication":
+    show_qb_authentication_page()
+elif st.session_state.current_page == "Selection":
+    show_selection_page()
+elif st.session_state.current_page == "InvoiceSelection":
+    show_invoice_selection_page()
+elif st.session_state.current_page == "Daily Sales Export":
+    show_daily_sales_export_page()
+elif st.session_state.current_page == "Distribution Invoices":
+    show_distribution_invoices_page()
