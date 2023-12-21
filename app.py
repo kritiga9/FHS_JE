@@ -24,7 +24,7 @@ def show_welcome_page():
             st.experimental_rerun()
     with col2:
         if st.button("QB Journal Entry"):
-            st.session_state.current_page = "Selection"
+            st.session_state.current_page = "Journal_Entry"
             st.experimental_rerun()
     with col3:
         if st.button("QB Invoices"):
@@ -34,8 +34,8 @@ def show_welcome_page():
 def show_qb_authentication_page():
     st.title("QB Authentication Page")
 
-def show_selection_page():
-    st.title("Select a Location")
+def show_journal_entry_page():
+    st.title("Select a Location for Journal Entry")
     locations = restaurants_filtered
     for location in locations:
         if st.button(location):
@@ -115,13 +115,13 @@ def show_distribution_invoices_page():
             st.button("Skip", key=f"Skip_Invoice_{index}")
 
 # Sidebar navigation
-st.sidebar.title("Sidebar Navigation")
-if st.sidebar.button("Welcome", key="sidebar_welcome_button"):
+st.sidebar.title("Navigation")
+if st.sidebar.button("Main Page", key="sidebar_welcome_button"):
     st.session_state.current_page = "Welcome"
 if st.sidebar.button("QB authentication", key="sidebar_auth_button"):
     st.session_state.current_page = "QB authentication"
 if st.sidebar.button("QB Journal Entry", key="sidebar_journal_button"):
-    st.session_state.current_page = "Selection"
+    st.session_state.current_page = "Journal_Entry"
 if st.sidebar.button("QB Invoices", key="sidebar_invoices_button"):
     st.session_state.current_page = "InvoiceSelection"
 
@@ -130,8 +130,8 @@ if st.session_state.current_page == "Welcome":
     show_welcome_page()
 elif st.session_state.current_page == "QB authentication":
     show_qb_authentication_page()
-elif st.session_state.current_page == "Selection":
-    show_selection_page()
+elif st.session_state.current_page == "Journal_Entry":
+    show_journal_entry_page()
 elif st.session_state.current_page == "InvoiceSelection":
     show_invoice_selection_page()
 elif st.session_state.current_page == "Daily Sales Export":
