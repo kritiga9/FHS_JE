@@ -2,10 +2,7 @@ from datetime import datetime
 
 import numpy as np
 
-from pandas import (
-    DatetimeIndex,
-    Series,
-)
+from pandas import DatetimeIndex, Series
 import pandas._testing as tm
 
 

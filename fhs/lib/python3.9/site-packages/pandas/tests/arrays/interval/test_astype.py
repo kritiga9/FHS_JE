@@ -1,11 +1,6 @@
 import pytest
 
-from pandas import (
-    Categorical,
-    CategoricalDtype,
-    Index,
-    IntervalIndex,
-)
+from pandas import Categorical, CategoricalDtype, Index, IntervalIndex
 import pandas._testing as tm
 
 

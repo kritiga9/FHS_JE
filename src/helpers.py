@@ -70,17 +70,20 @@ def parse_credentials():
     """
     config_dict = {}
     
+    keys_to_exclude = ["kbc_token_master", "kbc_url", "token"]
+    filtered_secrets = {key: st.secrets[key] for key in st.secrets if key not in keys_to_exclude}
+    
     # 1. check the longest inner subscription
     
     # at this point, I do not check for preauthorized or cookies
     
-    cred_keys = [key for key in st.secrets if "credentials" in key]
+    cred_keys = [key for key in filtered_secrets if "credentials" in key]
     
     for key in cred_keys:
         creds_dict = config_dict.get("credentials", dict())
         username_dict = creds_dict.get("usernames", dict())    
-        username = key.split('-')[-2]
-        key_end = key.split('-')[-1]
+        username = key.split('_')[-2]
+        key_end = key.split('_')[-1]
         user_dict =  username_dict.get(username, dict())
         user_dict[key_end] = st.secrets[key]
         username_dict[username] = user_dict

@@ -11,6 +11,23 @@ from src.streamlit_widgets import render_selectboxes
 import streamlit_authenticator as stauth
 from PIL import Image
 
+config_dict = parse_credentials()
+
+authenticator = stauth.Authenticate(
+    config_dict['credentials'],
+    config_dict['cookie']['name'],
+    config_dict['cookie']['key'],
+    config_dict['cookie']['expiry_days'],
+    config_dict['preauthorized']
+) 
+
+with st.sidebar:
+    #image = Image.open("/data/in/files/995108192_fhs_logo.png")
+    #st.image(image, caption='')
+
+    st.markdown('## **QUICKBOOKS AUTOMATION SETUP**')
+    name, authentication_status, username = authenticator.login('Login', 'main')
+
 restaurant_aux = pd.read_csv("in.c_streamlitio.restaurant_aux.csv")
 
 #Restaurants should be filtered based on the list of entities 
