@@ -1,3 +1,5 @@
+import hmac
+import jwt
 from src.settings import keboola_client, STATUS_TAB_ID
 from src.settings import STREAMLIT_BUCKET_ID
 import requests
@@ -5,7 +7,10 @@ import json
 import streamlit as st
 import pandas as pd
 import datetime
+from datetime import datetime, timedelta
 import numpy as np
+import extra_streamlit_components as stx
+
 
 # https://blog.streamlit.io/streamlit-authenticator-part-1-adding-an-authentication-component-to-your-app/
 
@@ -36,27 +41,6 @@ def parse_credentials():
     The method takes credentials from streamlit secret and converts
     these into a dictionary compatible with streamlit authenticator
 
-    expected composition of secret variable
-    credentials_usernames_USERNAME_VARIABLE
-    
-    eg
-    
-    credentials_usernames_ondra_email = 'ondrej.svoboda@keboola.com'
-    credentials_usernames_ondra_name = 'Ondřej Svoboda'
-    credentials_usernames_ondra_password = 'xxx'
-
-    this would be converted into 
-    
-    {"credentials":{
-        "usernames":{
-            "ondra":{
-                "email": 'ondrej.svoboda@keboola.com',
-                "name": 'Ondřej Svoboda', 
-                "password": 'xxx'
-                }
-            }
-        }}
-
     Returns
     -------
     config_dict - dictionary containing information about credentials formatted
@@ -69,34 +53,235 @@ def parse_credentials():
 
     """
     config_dict = {}
-    
+        
     keys_to_exclude = ["kbc_token_master", "kbc_url", "token"]
     filtered_secrets = {key: st.secrets[key] for key in st.secrets if key not in keys_to_exclude}
-    
-    # 1. check the longest inner subscription
-    
-    # at this point, I do not check for preauthorized or cookies
-    
-    cred_keys = [key for key in filtered_secrets if "credentials" in key]
-    
-    for key in cred_keys:
-        creds_dict = config_dict.get("credentials", dict())
-        username_dict = creds_dict.get("usernames", dict())    
-        username = key.split('_')[-2]
-        key_end = key.split('_')[-1]
-        user_dict =  username_dict.get(username, dict())
-        user_dict[key_end] = st.secrets[key]
-        username_dict[username] = user_dict
-        creds_dict["usernames"] = username_dict
-        config_dict["credentials"] = creds_dict
-    
+    # Convert the input dictionary into the desired format
+    config_dict = {
+        "credentials": {
+            "usernames": {
+                username: {
+                    
+                        "name": username,
+                        "password": password
+                    
+                }
+                for username, password in filtered_secrets.items()
+            }
+        }
+    }
+
     config_dict["cookie"] = {'expiry_days':0,
-                             'key':"random_signature_key",
-                             'name':"random_cookie_name"}
-    
+                                'key':"random_signature_key",
+                                'name':"random_cookie_name"}
+
     config_dict["preauthorized"] = {'emails':["melsby@gmail.com"]}
     
     return config_dict
+
+class Authenticate:
+    """
+    This class will create login, logout, register user, reset password, forgot password, 
+    forgot username, and modify user details widgets.
+    """
+    def __init__(self, credentials: dict, cookie_name: str, key: str, cookie_expiry_days: float=30.0, 
+        preauthorized: list=None):
+        """
+        Create a new instance of "Authenticate".
+
+        Parameters
+        ----------
+        credentials: dict
+            The dictionary of usernames, names, passwords, and emails.
+        cookie_name: str
+            The name of the JWT cookie stored on the client's browser for passwordless reauthentication.
+        key: str
+            The key to be used for hashing the signature of the JWT cookie.
+        cookie_expiry_days: float
+            The number of days before the cookie expires on the client's browser.
+        preauthorized: list
+            The list of emails of unregistered users authorized to register.
+        validator: Validator
+            A Validator object that checks the validity of the username, name, and email fields.
+        """
+        self.credentials = credentials
+        self.credentials['usernames'] = {key: value for key, value in credentials['usernames'].items()}
+        self.cookie_name = cookie_name
+        self.key = key
+        self.cookie_expiry_days = cookie_expiry_days
+        self.preauthorized = preauthorized
+        self.cookie_manager = stx.CookieManager()
+        #self.validator = validator if validator is not None else Validator()
+
+        if 'name' not in st.session_state:
+            st.session_state['name'] = None
+        if 'authentication_status' not in st.session_state:
+            st.session_state['authentication_status'] = None
+        if 'username' not in st.session_state:
+            st.session_state['username'] = None
+        if 'logout' not in st.session_state:
+            st.session_state['logout'] = None
+
+    def _token_encode(self) -> str:
+        """
+        Encodes the contents of the reauthentication cookie.
+
+        Returns
+        -------
+        str
+            The JWT cookie for passwordless reauthentication.
+        """
+        return jwt.encode({'name':st.session_state['name'],
+            'username':st.session_state['username'],
+            'exp_date':self.exp_date}, self.key, algorithm='HS256')
+
+    def _token_decode(self) -> str:
+        """
+        Decodes the contents of the reauthentication cookie.
+
+        Returns
+        -------
+        str
+            The decoded JWT cookie for passwordless reauthentication.
+        """
+        try:
+            return jwt.decode(self.token, self.key, algorithms=['HS256'])
+        except:
+            return False
+
+    def _set_exp_date(self) -> str:
+        """
+        Creates the reauthentication cookie's expiry date.
+
+        Returns
+        -------
+        str
+            The JWT cookie's expiry timestamp in Unix epoch.
+        """
+        return (datetime.utcnow() + timedelta(days=self.cookie_expiry_days)).timestamp()
+
+    def _check_pw(self) -> bool:
+        """
+        Checks the validity of the entered password.
+
+        Returns
+        -------
+        bool
+            The validity of the entered password by comparing it to the hashed password on disk.
+        """
+        return st.session_state["username"] in st.secrets and hmac.compare_digest(
+            st.session_state["password"],
+            st.secrets[st.session_state["username"]],
+        )
+
+    def _check_cookie(self):
+        """
+        Checks the validity of the reauthentication cookie.
+        """
+        self.token = self.cookie_manager.get(self.cookie_name)
+        if self.token is not None:
+            self.token = self._token_decode()
+            if self.token is not False:
+                if not st.session_state['logout']:
+                    if self.token['exp_date'] > datetime.utcnow().timestamp():
+                        if 'name' and 'username' in self.token:
+                            st.session_state['name'] = self.token['name']
+                            st.session_state['username'] = self.token['username']
+                            st.session_state['authentication_status'] = True
+    
+    def _check_credentials(self, inplace: bool=True) -> bool:
+        """
+        Checks the validity of the entered credentials.
+
+        Parameters
+        ----------
+        inplace: bool
+            Inplace setting, True: authentication status will be stored in session state, 
+            False: authentication status will be returned as bool.
+        Returns
+        -------
+        bool
+            Validity of entered credentials.
+        """
+        if self.username in self.credentials['usernames']:
+            try:
+                if self._check_pw():
+                    if inplace:
+                        st.session_state['name'] = self.credentials['usernames'][self.username]['name']
+                        self.exp_date = self._set_exp_date()
+                        self.token = self._token_encode()
+                        self.cookie_manager.set(self.cookie_name, self.token,
+                            expires_at=datetime.now() + timedelta(days=self.cookie_expiry_days))
+                        st.session_state['authentication_status'] = True
+                    else:
+                        return True
+                else:
+                    if inplace:
+                        st.session_state['authentication_status'] = False
+                    else:
+                        return False
+            except Exception as e:
+                print(e)
+        else:
+            if inplace:
+                st.session_state['authentication_status'] = False
+            else:
+                return False
+
+    def login(self, form_name: str, location: str='main') -> tuple:
+        """
+        Creates a login widget.
+
+        Parameters
+        ----------
+        form_name: str
+            The rendered name of the login form.
+        location: str
+            The location of the login form i.e. main or sidebar.
+        Returns
+        -------
+        str
+            Name of the authenticated user.
+        bool
+            The status of authentication, None: no credentials entered, 
+            False: incorrect credentials, True: correct credentials.
+        str
+            Username of the authenticated user.
+        """
+        if not st.session_state['authentication_status']:
+            self._check_cookie()
+            if not st.session_state['authentication_status']:
+                login_form = st.form('Login')
+
+
+                login_form.subheader(form_name)
+                self.username = login_form.text_input('Username')
+                st.session_state['username'] = self.username
+                self.password = login_form.text_input('Password', type='password')
+                st.session_state['password'] = self.password
+
+                if login_form.form_submit_button('Login'):
+                    self._check_credentials()
+        return st.session_state['name'], st.session_state['authentication_status'], st.session_state['username']
+
+    def logout(self, button_name: str, location: str='main', key: str=None):
+        """
+        Creates a logout button.
+
+        Parameters
+        ----------
+        button_name: str
+            The rendered name of the logout button.
+        location: str
+            The location of the logout button i.e. main or sidebar.
+        """
+        if location == 'main':
+            if st.button(button_name, key):
+                self.cookie_manager.delete(self.cookie_name)
+                st.session_state['logout'] = True
+                st.session_state['name'] = None
+                st.session_state['username'] = None
+                st.session_state['authentication_status'] = None
 
 def data_issues():
     st.error("""Downloading data from Quickbooks is not yet ready. Our team is monitoring the progress. 
