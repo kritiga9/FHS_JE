@@ -10,7 +10,7 @@ import datetime
 from datetime import datetime, timedelta
 import numpy as np
 import extra_streamlit_components as stx
-import random
+import random #delete this after we get real data
 
 
 # https://blog.streamlit.io/streamlit-authenticator-part-1-adding-an-authentication-component-to-your-app/
