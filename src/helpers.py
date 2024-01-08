@@ -2,6 +2,7 @@ import hmac
 import jwt
 from src.settings import keboola_client, STATUS_TAB_ID
 from src.settings import STREAMLIT_BUCKET_ID
+from src.settings import RESTAURANTS_TAB_ID
 import requests
 import json
 import streamlit as st
@@ -540,13 +541,34 @@ def is_job_running(api_token, config_id):
     
 ###Functions for Phase2 of the App (showing naigation and pages)
 
-restaurant_aux = pd.read_csv("in.c_streamlitio.restaurant_aux.csv")
+#restaurants_filtered = read_df(RESTAURANTS_TAB_ID, filter_col_name="entity_name", filter_col_value=name)
 
-    #Restaurants should be filtered based on the list of entities 
-    #And entities should be filtered based on the Username
-    #As we don't have a list yet, I took FHS_CORP entity
-restaurants_filtered = restaurant_aux[restaurant_aux['entity_name'] == 'FHS_CORP']['Restaurant'].unique().tolist()
+        #Restaurants should be filtered based on the list of entities 
+        #And entities should be filtered based on the Username
+        #As we don't have a list yet, I took FHS_CORP entity
+    #restaurants_filtered = restaurant_aux[restaurant_aux['entity_name'] == 'FHS_CORP']['Restaurant'].unique().tolist()
 
+def show_journal_entry_page(restaurants_filtered):
+    st.title("Select a Location for Journal Entry")
+    locations = restaurants_filtered
+    
+    for index, row in restaurants_filtered.iterrows():
+        restaurant_name = row['Restaurant']  # Get the restaurant name from the 'Restaurant' column
+        if st.button(restaurant_name):
+            st.session_state.selected_location = restaurant_name
+            st.session_state.current_page = "Daily Sales Export"
+            st.experimental_rerun()
+
+
+def show_invoice_selection_page(restaurants_filtered):
+    st.title("Select a Location for Invoice")
+    locations = restaurants_filtered
+    for location in locations:
+        if st.button(location):
+            st.session_state.selected_location = location
+            st.session_state.current_page = "Distribution Invoices"
+            st.experimental_rerun()
+                
 daily_totals = pd.read_csv("daily_totals.csv")
 def show_welcome_page():
         st.title("Welcome")
@@ -567,23 +589,24 @@ def show_welcome_page():
 def show_qb_authentication_page():
     st.title("QB Authentication Page")
 
-def show_journal_entry_page():
-    st.title("Select a Location for Journal Entry")
-    locations = restaurants_filtered
-    for location in locations:
-        if st.button(location):
-            st.session_state.selected_location = location
-            st.session_state.current_page = "Daily Sales Export"
-            st.experimental_rerun()
+# def show_journal_entry_page():
+#     st.title("Select a Location for Journal Entry")
+#     locations = restaurants_filtered
+#     for location in locations:
+#         if st.button(location):
+#             st.session_state.selected_location = location
+#             st.session_state.current_page = "Daily Sales Export"
+#             st.experimental_rerun()
+    
 
-def show_invoice_selection_page():
-    st.title("Select a Location for Invoice")
-    locations = restaurants_filtered
-    for location in locations:
-        if st.button(location):
-            st.session_state.selected_location = location
-            st.session_state.current_page = "Distribution Invoices"
-            st.experimental_rerun()
+# def show_invoice_selection_page():
+#     st.title("Select a Location for Invoice")
+#     locations = restaurants_filtered
+#     for location in locations:
+#         if st.button(location):
+#             st.session_state.selected_location = location
+#             st.session_state.current_page = "Distribution Invoices"
+#             st.experimental_rerun()
 
 def show_daily_sales_export_page():
     st.title(st.session_state.selected_location)
