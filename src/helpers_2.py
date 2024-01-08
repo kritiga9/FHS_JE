@@ -15,13 +15,6 @@ import random #delete this after we get real data
 
 ###Functions for Phase2 of the App (showing naigation and pages)
 
-#restaurants_filtered = read_df(RESTAURANTS_TAB_ID, filter_col_name="entity_name", filter_col_value=name)
-
-        #Restaurants should be filtered based on the list of entities 
-        #And entities should be filtered based on the Username
-        #As we don't have a list yet, I took FHS_CORP entity
-    #restaurants_filtered = restaurant_aux[restaurant_aux['entity_name'] == 'FHS_CORP']['Restaurant'].unique().tolist()
-
 def show_journal_entry_page(restaurants_filtered):
     st.title("Select a Location for Journal Entry")
     locations = restaurants_filtered
@@ -62,25 +55,6 @@ def show_welcome_page():
 
 def show_qb_authentication_page():
     st.title("QB Authentication Page")
-
-# def show_journal_entry_page():
-#     st.title("Select a Location for Journal Entry")
-#     locations = restaurants_filtered
-#     for location in locations:
-#         if st.button(location):
-#             st.session_state.selected_location = location
-#             st.session_state.current_page = "Daily Sales Export"
-#             st.experimental_rerun()
-    
-
-# def show_invoice_selection_page():
-#     st.title("Select a Location for Invoice")
-#     locations = restaurants_filtered
-#     for location in locations:
-#         if st.button(location):
-#             st.session_state.selected_location = location
-#             st.session_state.current_page = "Distribution Invoices"
-#             st.experimental_rerun()
 
 def show_daily_sales_export_page():
     st.title(st.session_state.selected_location)
