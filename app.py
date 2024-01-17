@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import time
 from datetime import datetime, timedelta
 from src.settings import STATUS_TAB_ID, MAPPING_CLASSES_TAB_ID,MAPPING_TAB_ID, DEBUG, RESTAURANTS_TAB_ID
 from src.helpers import parse_credentials
@@ -43,6 +44,31 @@ if authentication_status:
         st.session_state.current_page = "Welcome"
         
     restaurants_filtered = read_df(RESTAURANTS_TAB_ID, filter_col_name="entity_name", filter_col_value=name)
+    
+    ### TIME testing 
+    #here i take entity name as is 
+    # First approach
+    start_time = time.time()
+    # Your first block of code
+    ACCOUNTS_TAB_ID = f'in.c-kds-team-ex-quickbooks-online-fhs-quickbooks-{name}.Account'
+    accounts = read_df(ACCOUNTS_TAB_ID)
+    end_time = time.time()
+    time_taken_first = end_time - start_time
+    st.write(f"Time taken by the first approach: {time_taken_first} seconds")
+
+    # Second approach
+    start_time = time.time()
+    # Your second block of code
+    ACCOUNTS_TAB_ID_2 = f'out.c-rollback_version.accounts'
+    accounts_2 = read_df(ACCOUNTS_TAB_ID_2, filter_col_name="entity_name", filter_col_value=name)
+    end_time = time.time()
+    time_taken_second = end_time - start_time
+    st.write(f"Time taken by the second approach: {time_taken_second} seconds")
+
+    #ACCOUNTS_TAB_ID = f'in.c-kds-team-ex-quickbooks-online-fhs-quickbooks-{name}.Account'
+    #accounts = read_df(ACCOUNTS_TAB_ID)
+    
+    ##TIME TESTING END
         
     # Sidebar navigation
     st.sidebar.title("Navigation")
