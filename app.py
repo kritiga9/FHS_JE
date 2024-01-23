@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 import time
 from datetime import datetime, timedelta
-from src.settings import STATUS_TAB_ID, MAPPING_CLASSES_TAB_ID,MAPPING_TAB_ID, DEBUG, RESTAURANTS_TAB_ID
+from src.settings import STATUS_TAB_ID, MAPPING_CLASSES_TAB_ID,MAPPING_TAB_ID, DEBUG, RESTAURANTS_TAB_ID, DAILY_SALES
 from src.helpers import parse_credentials
 from src.helpers import read_df
 from src.helpers import determine_step
-from src.helpers_2 import show_welcome_page, show_qb_authentication_page,  show_daily_sales_export_page, show_distribution_invoices_page ,show_journal_entry_page, show_invoice_selection_page
+from src.helpers_2 import show_welcome_page, show_qb_authentication_page,  show_daily_sales_export_page, show_distribution_invoices_page ,show_journal_entry_page, show_invoice_selection_page, show_journal_entry
 from src.streamlit_widgets import WorkflowProgress, submit_form, render_clickable_link
 from src.streamlit_widgets import render_selectboxes
 from src.helpers import Authenticate
@@ -93,7 +93,7 @@ if authentication_status:
     elif st.session_state.current_page == "InvoiceSelection":
         show_invoice_selection_page(restaurants_filtered)
     elif st.session_state.current_page == "Daily Sales Export":
-        show_daily_sales_export_page()
+        show_daily_sales_export_page(name)
     elif st.session_state.current_page == "Distribution Invoices":
         show_distribution_invoices_page()
 

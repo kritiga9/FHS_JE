@@ -12,5 +12,7 @@ MAPPING_CLASSES_TAB_ID = 'in.c-StreamlitIO.mapping_classes'
 STREAMLIT_BUCKET_ID = 'in.c-StreamlitIO'
 RESTAURANTS_TAB_ID = 'in.c-StreamlitIO.restaurant_aux'
 MAPPING_TAB_ID = 'in.c-StreamlitIO.mapping'
+GROSS_SALES = 'in.c-StreamlitIO_journal_entry.gross_sales'
+DAILY_SALES = 'in.c-StreamlitIO_journal_entry.journal_entry'
 DEBUG = False
 
