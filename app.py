@@ -48,24 +48,24 @@ if authentication_status:
     ### TIME testing 
     #here i take entity name as is 
     # First approach
-    start_time = time.time()
-    # Your first block of code
-    ACCOUNTS_TAB_ID = f'in.c-kds-team-ex-quickbooks-online-fhs-quickbooks-{name}.Account'
-    accounts = read_df(ACCOUNTS_TAB_ID)['FullyQualifiedName']
-    end_time = time.time()
-    time_taken_first = end_time - start_time
-    st.write(f"Time taken by the first approach: {time_taken_first} seconds")
-    st.write(accounts)
+    # start_time = time.time()
+    # # Your first block of code
+    # ACCOUNTS_TAB_ID = f'in.c-kds-team-ex-quickbooks-online-fhs-quickbooks-{name}.Account'
+    # accounts = read_df(ACCOUNTS_TAB_ID)['FullyQualifiedName']
+    # end_time = time.time()
+    # time_taken_first = end_time - start_time
+    # st.write(f"Time taken by the first approach: {time_taken_first} seconds")
+    # st.write(accounts)
 
-    # Second approach
-    start_time = time.time()
-    # Your second block of code
-    ACCOUNTS_TAB_ID_2 = f'out.c-rollback_version.accounts'
-    accounts_2 = read_df(ACCOUNTS_TAB_ID_2, filter_col_name="entity_name", filter_col_value=name)['Account_name']
-    end_time = time.time()
-    time_taken_second = end_time - start_time
-    st.write(f"Time taken by the second approach: {time_taken_second} seconds")
-    st.write(accounts)    
+    # # Second approach
+    # start_time = time.time()
+    # # Your second block of code
+    # ACCOUNTS_TAB_ID_2 = 'out.c-rollback_version.accounts'
+    # accounts_2 = read_df(ACCOUNTS_TAB_ID_2, filter_col_name="entity_name", filter_col_value=name)['Account_name']
+    # end_time = time.time()
+    # time_taken_second = end_time - start_time
+    # st.write(f"Time taken by the second approach: {time_taken_second} seconds")
+    # st.write(accounts)    
 
     #ACCOUNTS_TAB_ID = f'in.c-kds-team-ex-quickbooks-online-fhs-quickbooks-{name}.Account'
     #accounts = read_df(ACCOUNTS_TAB_ID)
