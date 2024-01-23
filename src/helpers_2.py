@@ -99,7 +99,7 @@ def show_daily_sales_export_page(name):
     st.subheader("Daily Sales Export")
 
     # Filter daily_totals DataFrame based on selected_location
-    daily_totals = read_df(GROSS_SALES, filter_col_name="entity_name", filter_col_value=name,dtype=str)
+    daily_totals = read_df(GROSS_SALES, filter_col_name="restaurant_full", filter_col_value=st.session_state.selected_location,dtype=str)
     daily_totals["gross_sales"] = daily_totals["gross_sales"].astype(float)
     daily_totals = daily_totals.sort_values("date", ascending=False).reset_index(drop=True)
     # Display column headers
