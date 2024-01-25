@@ -14,7 +14,7 @@ RESTAURANTS_TAB_ID = 'in.c-StreamlitIO.restaurant_aux'
 MAPPING_TAB_ID = 'in.c-StreamlitIO.mapping'
 GROSS_SALES = 'in.c-StreamlitIO_journal_entry.gross_sales'
 DAILY_SALES = 'in.c-StreamlitIO_journal_entry.journal_entry'
-#Will be used toger with variable indicating config id
+#Will be used toger with variable indicating config id, for extracting Accounts
 CONFIG_ID = 'in.c-kds-team-ex-quickbooks-online-fhs-quickbooks-'
 DEBUG = False
 
