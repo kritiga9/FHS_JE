@@ -46,6 +46,7 @@ if authentication_status:
     restaurants_filtered = read_df(RESTAURANTS_TAB_ID, filter_col_name="entity_name", filter_col_value=name)
     
     status_df = read_df(STATUS_TAB_ID, filter_col_name="entity_name", filter_col_value=name, dtype={'config_id':str})
+    config_id = status_df["config_id"].iloc[0]
     
     ### TIME testing - placeholders for other time testing
     #here i take entity name as is 

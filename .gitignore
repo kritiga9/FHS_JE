@@ -1,4 +1,10 @@
+# Ignore all files without an extension
+*
+!*/
+!*.*
+
+
 fhs/*
 ./streamlit
 secrets.toml
-journal_entry
+.streamlit/

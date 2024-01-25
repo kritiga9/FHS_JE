@@ -1,7 +1,7 @@
 import hmac
 import jwt
 from src.settings import keboola_client, STATUS_TAB_ID
-from src.settings import STREAMLIT_BUCKET_ID, CONFIG_ID
+from src.settings import STREAMLIT_BUCKET_ID, CONFIG_ID_KBC
 from src.settings import RESTAURANTS_TAB_ID , GROSS_SALES, DAILY_SALES
 import requests
 import json
@@ -147,7 +147,7 @@ def show_daily_sales_export_page(name):
 
 def show_journal_entry(name, key):
     df = read_df(DAILY_SALES, filter_col_name="id", filter_col_value=key)
-    ACCOUNTS_TAB_ID = f'{CONFIG_ID}{name}.Account'
+    ACCOUNTS_TAB_ID = f'{CONFIG_ID_KBC}{config_id}.Account'
     accounts = read_df(ACCOUNTS_TAB_ID)['FullyQualifiedName'].tolist()
     #accounts = df["account"].unique().tolist()
     df = df[["account","Debit","Credit","Description"]]
