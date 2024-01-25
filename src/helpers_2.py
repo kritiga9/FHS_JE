@@ -1,7 +1,7 @@
 import hmac
 import jwt
 from src.settings import keboola_client, STATUS_TAB_ID
-from src.settings import STREAMLIT_BUCKET_ID
+from src.settings import STREAMLIT_BUCKET_ID, CONFIG_ID
 from src.settings import RESTAURANTS_TAB_ID , GROSS_SALES, DAILY_SALES
 import requests
 import json
@@ -87,17 +87,10 @@ def show_distribution_invoices_page():
         col2.write(row["Invoice number"])
         col3.write(row["Invoice total"])
 
-
-
-
-
-
-
 def show_daily_sales_export_page(name):
     # need to change this into an editable dataframe
     st.title(st.session_state.selected_location)
     st.subheader("Daily Sales Export")
-
     # Filter daily_totals DataFrame based on selected_location
     daily_totals = read_df(GROSS_SALES, filter_col_name="restaurant_full", filter_col_value=st.session_state.selected_location,dtype=str)
     daily_totals["gross_sales"] = daily_totals["gross_sales"].astype(float)
@@ -131,7 +124,7 @@ def show_daily_sales_export_page(name):
             formatted_date = row["date"].replace("-", "")
             key = row["restaurant_id"] + "_" + formatted_date
             if st.button("Review & Post", key=f"Review&Post_{index}"):
-                show_journal_entry(key)
+                show_journal_entry(name, key)
                 break
                 
         with col4:
@@ -152,9 +145,11 @@ def show_daily_sales_export_page(name):
         st.markdown(f'<hr style="{hr_style}">', unsafe_allow_html=True)
     
 
-def show_journal_entry(key):
+def show_journal_entry(name, key):
     df = read_df(DAILY_SALES, filter_col_name="id", filter_col_value=key)
-    accounts = df["account"].unique().tolist()
+    ACCOUNTS_TAB_ID = f'{CONFIG_ID}{name}.Account'
+    accounts = read_df(ACCOUNTS_TAB_ID)['FullyQualifiedName'].tolist()
+    #accounts = df["account"].unique().tolist()
     df = df[["account","Debit","Credit","Description"]]
 
     editable_df = st.data_editor(df,

@@ -45,7 +45,9 @@ if authentication_status:
         
     restaurants_filtered = read_df(RESTAURANTS_TAB_ID, filter_col_name="entity_name", filter_col_value=name)
     
-    ### TIME testing 
+    status_df = read_df(STATUS_TAB_ID, filter_col_name="entity_name", filter_col_value=name, dtype={'config_id':str})
+    
+    ### TIME testing - placeholders for other time testing
     #here i take entity name as is 
     # First approach
     # start_time = time.time()
@@ -57,19 +59,6 @@ if authentication_status:
     # st.write(f"Time taken by the first approach: {time_taken_first} seconds")
     # st.write(accounts)
 
-    # # Second approach
-    # start_time = time.time()
-    # # Your second block of code
-    # ACCOUNTS_TAB_ID_2 = 'out.c-rollback_version.accounts'
-    # accounts_2 = read_df(ACCOUNTS_TAB_ID_2, filter_col_name="entity_name", filter_col_value=name)['Account_name']
-    # end_time = time.time()
-    # time_taken_second = end_time - start_time
-    # st.write(f"Time taken by the second approach: {time_taken_second} seconds")
-    # st.write(accounts)    
-
-    #ACCOUNTS_TAB_ID = f'in.c-kds-team-ex-quickbooks-online-fhs-quickbooks-{name}.Account'
-    #accounts = read_df(ACCOUNTS_TAB_ID)
-    
     ##TIME TESTING END
         
     # Sidebar navigation
@@ -89,7 +78,15 @@ if authentication_status:
     elif st.session_state.current_page == "QB authentication":
         show_qb_authentication_page()
     elif st.session_state.current_page == "Journal_Entry":
-        show_journal_entry_page(restaurants_filtered)
+        # Show JE dates without choosing location if entity doesn't have classes/depts
+        if status_df["report_tracking"].iloc[0] == "None":
+            # If report_tracking is "None", automatically set the selected location
+            if 'selected_location' not in st.session_state or st.session_state.selected_location not in restaurants_filtered['Restaurant'].values:
+                st.session_state.selected_location = restaurants_filtered['Restaurant'].iloc[0]
+            show_daily_sales_export_page(name)
+        else:
+            # Show the page for choosing a location
+            show_journal_entry_page(restaurants_filtered)
     elif st.session_state.current_page == "InvoiceSelection":
         show_invoice_selection_page(restaurants_filtered)
     elif st.session_state.current_page == "Daily Sales Export":
